@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { axiosWithAuth } from "../utils/axiosWithAuth";
 
 const initialColor = {
@@ -10,12 +9,20 @@ const initialColor = {
 const ColorList = ({ colors, updateColors }) => {
   console.log(colors);
   const [editing, setEditing] = useState(false);
+  const [adding, setAdding] = useState(false);
+  const [colorToAdd, setColorToAdd] = useState();
   const [colorToEdit, setColorToEdit] = useState(initialColor);
 
   const editColor = color => {
     setEditing(true);
     setColorToEdit(color);
     console.log("sad",colorToEdit);
+  };
+  const addColor = color => {
+    setAdding(true);
+    console.log("adding",colorToAdd)
+    axiosWithAuth().post(`/api/colors`,colorToAdd)
+    .catch(err=>console.log(err));
   };
 
   const saveEdit = e => {
@@ -28,7 +35,6 @@ const ColorList = ({ colors, updateColors }) => {
   };
 
   const deleteColor = color => {
-    console.log("deleting", color);
     // make a delete request to delete this color
     axiosWithAuth().delete(`/api/colors/${color.id}`)
     .catch(err=>console.log(err));
@@ -87,8 +93,37 @@ const ColorList = ({ colors, updateColors }) => {
           </div>
         </form>
       )}
-      <div className="spacer" />
-      {/* stretch - build another form here to add a color */}
+      <div className="spacer">
+      <form onSubmit={addColor}>
+        <legend>Add color</legend>
+          <label>
+            color name:
+            <input
+              onChange={e =>
+                setColorToAdd({ ...colorToAdd, color: e.target.value })
+              }
+              // value={colorToEdit.color}
+            />
+          </label>
+          <label>
+            hex code:
+            <input
+              onChange={e =>
+                setColorToAdd({
+                  ...colorToAdd,
+                  code: { hex: e.target.value }
+                })
+              }
+              // value={colorToEdit.code.hex}
+            />
+          </label>
+          <div className="button-row">
+            <button type="submit">Add</button>
+            <button onClick={() => setAdding(false)}>Cancel</button>
+          </div>
+        </form>
+
+      </div>
     </div>
   );
 };
